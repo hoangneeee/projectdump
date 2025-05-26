@@ -1,4 +1,6 @@
-# 🚀 ProjectDump
+# 🚀 ProjectDump CLI
+
+Project fork from https://github.com/liamhnam/ProjectDump with some refactoring.
 
 **ProjectDump** is a Python CLI tool that detects a project's technologies, filters out non-essential files, and compiles the source code and directory structure into a single readable file.
 
@@ -14,6 +16,70 @@
 
 ---
 
+## 📦 Installation
+
+### Method 1: Install from source (Recommended)
+
+1. Clone or download the project files
+2. Navigate to the project directory
+3. Install the package:
+
+```bash
+pip install -e .
+```
+
+### Method 2: Install using pip
+
+```bash
+pip install projectdump
+```
+
+---
+
+## Usage
+
+### Basic Usage
+
+```bash
+# Use current directory
+projectdump
+
+# Specify a project directory
+projectdump /path/to/your/project
+
+# Use Vietnamese language
+projectdump . --lang vi
+
+# Custom output filename
+projectdump . --output my_dump.txt
+```
+
+### Command Options
+
+- `project_path`: Path to the project directory (optional, defaults to current directory)
+- `--lang, --language`: Language for output messages (en or vi, default: en)
+- `--output, -o`: Output filename (default: source_dump.txt)
+- `--version`: Show version information
+- `--help`: Show help message
+
+### Examples
+
+```bash
+# Analyze current directory with English output
+projectdump
+
+# Analyze specific project with Vietnamese messages
+projectdump ~/my-react-app --lang vi
+
+# Custom output file
+projectdump ~/my-python-project -o python_source.txt
+
+# Show help
+projectdump --help
+```
+
+---
+
 ## 🧑‍💻 Supported Technologies (Partial List)
 
 - **Languages**: Python, JS/TS, Java, Kotlin, PHP, Ruby, Go, Rust, C#, Dart, R, Scala, Elixir
@@ -24,6 +90,7 @@
 ---
 
 ## 📂 Output Example
+
 ```
 🚀 PROJECTDUMP
 ========================================
@@ -54,6 +121,7 @@
 ```
 
 Inside `source_dump.txt`demo:
+
 ```text
 # ==================================================
 # Path: /path/to/your/project
@@ -81,13 +149,8 @@ import os
 ...
 ```
 
-## 🚀 Usage
-Run from the command line:
-```bash
-  python main.py /path/to/your/project
-```
-
 ## 📁 What It Ignores
+
 - **Dependency folders**: node_modules, venv, etc.
 
 - **Media & binaries**: .jpg, .exe, .log, etc.
@@ -97,8 +160,17 @@ Run from the command line:
 - **Large files over 100MB**
 
 ## ✅ Requirements
+
 Python 3.x
 
 ## 🤝 Contributing
-Feel free to fork and contribute to enhance tech detection, support new stacks, or improve output formatting!
 
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test the CLI tool
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.

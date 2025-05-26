@@ -1,0 +1,11 @@
+.idea
+.vscode
+
+__pycache__
+venv
+.venv
+
+.env
+
+source_dump.txt
+projectdump.egg-info
