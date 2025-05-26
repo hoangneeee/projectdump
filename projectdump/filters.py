@@ -1,4 +1,6 @@
 from pathlib import Path
+from typing import Union, Iterable
+import os
 
 def get_essential_files():
     return set()
@@ -67,10 +69,43 @@ def get_exclude_patterns():
 def should_exclude_path(path, exclude_dirs):
     return any(part.lower() in exclude_dirs for part in Path(path).parts)
 
-def should_exclude_file(filename, exclude_files):
+def should_exclude_file(filename: str, exclude_files: Iterable[str]) -> bool:
+    """
+    Check if a file should be excluded based on the exclusion patterns.
+    
+    Args:
+        filename: Name of the file to check
+        exclude_files: Iterable of patterns to match against the filename.
+                     Patterns can be either exact matches (case-insensitive) or
+                     wildcard patterns starting with '*.' to match file extensions.
+    
+    Returns:
+        bool: True if the file matches any exclusion pattern, False otherwise.
+    """
+    # Convert filename to lowercase once for case-insensitive comparison
     filename_lower = filename.lower()
-    return any(
-        filename_lower == pattern.lower() or 
-        (pattern.startswith('*.') and filename_lower.endswith(pattern[2:].lower()))
-        for pattern in exclude_files
-    )
+    
+    for pattern in exclude_files:
+        try:
+            pattern_lower = pattern.lower()
+            
+            # Check for exact match
+            if filename_lower == pattern_lower:
+                print(f"Exact match: {filename} matches {pattern}")
+                return True
+                
+            # Check for extension match (pattern starts with '*.' and file has the exact extension)
+            if pattern_lower.startswith('*.'):
+                pattern_ext = pattern_lower[2:]  # Remove '*.' to get extension
+                # Get the actual file extension
+                _, file_ext = os.path.splitext(filename_lower)
+                file_ext = file_ext[1:] if file_ext.startswith('.') else file_ext  # Remove leading dot
+                
+                if file_ext == pattern_ext:
+                    print(f"Extension match: {filename} matches {pattern}")
+                    return True
+                
+        except Exception as e:
+            print(f"Error checking pattern {pattern} against {filename}: {e}")
+    
+    return False

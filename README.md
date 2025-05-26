@@ -149,6 +149,8 @@ import os
 ...
 ```
 
+---
+
 ## 📁 What It Ignores
 
 - **Dependency folders**: node_modules, venv, etc.

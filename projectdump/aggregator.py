@@ -1,8 +1,8 @@
 import os
-from .constants import MAX_FILE_SIZE
-from .detector import detect_project_tech, get_extensions_by_tech
-from .filters import get_essential_files, get_exclude_patterns, should_exclude_path, should_exclude_file
-from .tree_generator import generate_directory_tree
+from projectdump.constants import MAX_FILE_SIZE
+from projectdump.detector import detect_project_tech, get_extensions_by_tech
+from projectdump.filters import get_essential_files, get_exclude_patterns, should_exclude_path, should_exclude_file
+from projectdump.tree_generator import generate_directory_tree
 from pathlib import Path
 
 def aggregate_code(project_path, text, output_filename="source_dump.txt"):

@@ -23,7 +23,7 @@ def detect_project_tech(project_path):
         'csharp': ['*.csproj', 'Program.cs'],
         'php': ['composer.json'],
         'ruby': ['Gemfile'],
-        'go': ['go.mod'],
+        'go': ['go.mod', '*.go'],
         'rust': ['Cargo.toml'],
         'elixir': ['mix.exs'],
         'dart': ['pubspec.yaml'],

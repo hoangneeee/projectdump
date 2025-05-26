@@ -5,8 +5,8 @@ ProjectDump CLI - Command Line Interface
 import sys
 import os
 import argparse
-from .aggregator import aggregate_code
-from .constants import TEXT_VI, TEXT_EN
+from projectdump.aggregator import aggregate_code
+from projectdump.constants import TEXT_VI, TEXT_EN
 
 def create_parser():
     """Create argument parser"""
