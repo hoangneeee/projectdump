@@ -27,13 +27,8 @@ Support MacOS, Linux
 3. Install the package:
 
 ```bash
-pip install -e .
-```
-
-### Method 2: Install using pip
-
-```bash
-pip install projectdump
+make build
+./install.sh
 ```
 
 ---
@@ -54,6 +49,16 @@ projectdump . --lang vi
 
 # Custom output filename
 projectdump . --output my_dump.txt
+```
+
+### Dump ignore
+
+You can create a `.dumpignore` file in the project root to specify patterns of files and directories to exclude from the dump.
+
+```txt
+node_modules/*
+venv/*
+.env
 ```
 
 ### Command Options
