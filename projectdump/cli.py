@@ -16,9 +16,10 @@ def create_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  projectdump                    # Use current directory
+  projectdump                    # Use current directory, output to source_dump.txt
   projectdump /path/to/project   # Specify project path
-  projectdump . --lang en        # Use English language
+  projectdump . -o dump.md       # Output to dump.md in current directory
+  projectdump --lang en          # Use English language
   projectdump --help             # Show this help message
         """
     )
@@ -46,7 +47,7 @@ Examples:
     parser.add_argument(
         '--version',
         action='version',
-        version='%(prog)s 1.0.0'
+        version='%(prog)s 1.0.1' # Consider updating version if you release this
     )
     
     return parser
@@ -72,11 +73,13 @@ def main():
     print(text['app_title'])
     print("=" * 40)
     
-    # Run aggregation
-    success = aggregate_code(project_path, text)
+    # Run aggregation, passing the output filename from args
+    success = aggregate_code(project_path, text, output_filename=args.output)
     
     if success:
-        print(text['done'])
+        print(text['done']) # The 'done' message in constants implies source_dump.txt
+                            # Consider making it dynamic or changing the message.
+                            # For now, aggregate_code prints the actual output path.
         return 0
     else:
         print(text['error'])

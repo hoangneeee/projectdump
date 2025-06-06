@@ -1,12 +1,18 @@
 from pathlib import Path
 from typing import Union, Iterable
 import os
+import fnmatch 
 
 def get_essential_files():
     return set()
 
-def get_exclude_patterns():
-    exclude_dirs = {
+def get_exclude_patterns(project_path: str):
+    """
+    Get combined default and custom exclusion patterns.
+    Custom patterns are read from .dumpignore in the project_path.
+    """
+
+    default_exclude_dirs = {
     # Dependencies & environments
     'node_modules', 'vendor', 'venv', 'env', '.venv', '.env', '.mypy_cache', '.ruff_cache', '.pytest_cache', '__pycache__', 
     '.cache', 'pip-wheel-metadata', 'site-packages', 'deps', 'packages', '.tox',
@@ -33,7 +39,7 @@ def get_exclude_patterns():
     'db', 'database', 'sqlite', 'sessions', 'flask_session', 'instance',
     }
 
-    exclude_files = {
+    default_exclude_files = {
         # Logs
         '*.log', '*.log.*', '*.out',
 
@@ -63,49 +69,101 @@ def get_exclude_patterns():
         '*.env', '*.env.*', '*.ini', '*.toml', '*.bak', '*.swp', '*.swo',
     }
 
+    custom_exclude_dirs = set()
+    custom_exclude_files = set()
+
+    dumpignore_path = os.path.join(project_path, ".dumpignore")
+    if os.path.exists(dumpignore_path):
+        try:
+            with open(dumpignore_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    
+                    # Normalize path separators for patterns
+                    pattern = Path(line).as_posix()
+
+                    if pattern.endswith('/'):
+                        custom_exclude_dirs.add(pattern[:-1]) # Store without trailing slash
+                    else:
+                        custom_exclude_files.add(pattern)
+        except Exception as e:
+            print(f"Warning: Could not read or parse .dumpignore file at {dumpignore_path}: {e}")
+
+    exclude_dirs = default_exclude_dirs.union(custom_exclude_dirs)
+    exclude_files = default_exclude_files.union(custom_exclude_files)
     
     return exclude_dirs, exclude_files
 
-def should_exclude_path(path, exclude_dirs):
-    return any(part.lower() in exclude_dirs for part in Path(path).parts)
+def should_exclude_path(rel_dir_path: str, exclude_dir_patterns: Iterable[str]) -> bool:
+    """
+    Check if a directory path should be excluded.
+    rel_dir_path: Relative path of the directory from project root.
+    exclude_dir_patterns: A set of patterns.
+        - Simple names (e.g., "node_modules") match if any part of rel_dir_path is that name.
+        - Glob patterns or paths with "/" (e.g., "build/*", "target/classes") match rel_dir_path using fnmatch.
+    """
+    normalized_rel_dir_path = Path(rel_dir_path).as_posix()
 
-def should_exclude_file(filename: str, exclude_files: Iterable[str]) -> bool:
+    for pattern in exclude_dir_patterns:
+        normalized_pattern = Path(pattern).as_posix()
+
+        # Check for simple name match in any part of the path
+        # (e.g., pattern "node_modules" should exclude "src/node_modules")
+        if "/" not in normalized_pattern and "*" not in normalized_pattern and \
+           "?" not in normalized_pattern and "[" not in normalized_pattern:
+            # This is a simple directory name, check if it's one of the components
+            if any(part.lower() == normalized_pattern.lower() for part in Path(normalized_rel_dir_path).parts):
+                return True
+        else:
+            # This is a glob pattern or a path-like pattern (e.g., "build/", "foo/*/bar")
+            # Match it against the full relative directory path
+            if fnmatch.fnmatchcase(normalized_rel_dir_path, normalized_pattern):
+                return True
+            # Also match if pattern was `some_dir` and path is `some_dir/child_dir`
+            # This requires matching prefixes for directory patterns.
+            # fnmatch with `*` handles this: `fnmatch.fnmatchcase(path, pattern + '*')`
+            # e.g. pattern `build` should exclude `build/foo`
+            if fnmatch.fnmatchcase(normalized_rel_dir_path, normalized_pattern + ('/*' if not normalized_pattern.endswith('*') else '')):
+                return True
+
+
+    return False
+
+
+def should_exclude_file(filename: str, rel_filepath: str, exclude_file_patterns: Iterable[str]) -> bool:
     """
     Check if a file should be excluded based on the exclusion patterns.
     
     Args:
-        filename: Name of the file to check
-        exclude_files: Iterable of patterns to match against the filename.
-                     Patterns can be either exact matches (case-insensitive) or
-                     wildcard patterns starting with '*.' to match file extensions.
+        filename: Base name of the file (e.g., "script.py").
+        rel_filepath: Relative path of the file from project root (e.g., "src/script.py").
+        exclude_file_patterns: Iterable of patterns.
+            - Patterns with "/" are matched against rel_filepath.
+            - Patterns without "/" (e.g., "*.log", "Makefile") are matched against filename primarily,
+              but also against rel_filepath to catch cases like `somedir/*.log`.
     
     Returns:
         bool: True if the file matches any exclusion pattern, False otherwise.
     """
-    # Convert filename to lowercase once for case-insensitive comparison
-    filename_lower = filename.lower()
-    
-    for pattern in exclude_files:
-        try:
-            pattern_lower = pattern.lower()
-            
-            # Check for exact match
-            if filename_lower == pattern_lower:
-                print(f"Exact match: {filename} matches {pattern}")
+
+    normalized_rel_filepath = Path(rel_filepath).as_posix()
+    for pattern in exclude_file_patterns:
+        normalized_pattern = Path(pattern).as_posix()
+        
+        # Try matching pattern against the full relative file path
+        if fnmatch.fnmatchcase(normalized_rel_filepath, normalized_pattern):
+            # print(f"File Exclude (rel_path): '{normalized_rel_filepath}' matches '{normalized_pattern}'")
+            return True
+        
+        # If pattern contains no slashes, it's a filename-only pattern (e.g., "*.log", "Makefile")
+        # And if the previous match failed (e.g. pattern was '*.log', rel_filepath was 'src/foo.log')
+        # then we should check filename only.
+        if "/" not in normalized_pattern: 
+            if fnmatch.fnmatchcase(filename, normalized_pattern): # Match against basename
+                # print(f"File Exclude (filename): '{filename}' matches '{normalized_pattern}'")
                 return True
                 
-            # Check for extension match (pattern starts with '*.' and file has the exact extension)
-            if pattern_lower.startswith('*.'):
-                pattern_ext = pattern_lower[2:]  # Remove '*.' to get extension
-                # Get the actual file extension
-                _, file_ext = os.path.splitext(filename_lower)
-                file_ext = file_ext[1:] if file_ext.startswith('.') else file_ext  # Remove leading dot
-                
-                if file_ext == pattern_ext:
-                    print(f"Extension match: {filename} matches {pattern}")
-                    return True
-                
-        except Exception as e:
-            print(f"Error checking pattern {pattern} against {filename}: {e}")
-    
     return False
+

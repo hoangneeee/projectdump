@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="projectdump",
-    version="1.0.0",
+    version="1.0.1",
     author="Henry Vo",
     author_email="levuthanhtung11@gmail.com",
     description="A CLI tool to aggregate and dump project source code",

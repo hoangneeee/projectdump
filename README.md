@@ -8,6 +8,8 @@ Project fork from https://github.com/liamhnam/ProjectDump with some refactoring.
 
 ## 📦 Features
 
+Support MacOS, Linux
+
 - 🔍 Auto-detects technologies (Python, JavaScript, Java, etc.)
 - 🧹 Skips dependencies, binaries, media, and config clutter
 - 🌲 Generates a clean directory tree
@@ -175,4 +177,4 @@ Python 3.x
 
 ## License
 
-MIT License - see LICENSE file for details.
+Apache License 2.0 [LICENSE](LICENSE)

@@ -2,7 +2,7 @@
 ProjectDump - A CLI tool to aggregate project source code
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "Henry Vo"
 __email__ = "levuthanhtung11@gmail.com"
 

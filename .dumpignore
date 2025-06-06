@@ -1,0 +1,5 @@
+
+projectdump/one_file_version.py
+
+projectdump.egg-info/*
+release/*

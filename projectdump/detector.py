@@ -39,8 +39,8 @@ def detect_project_tech(project_path):
         'deno': ['deno.json'],
         'bun': ['bun.lockb'],
 
-        'c': ['*.c', '*.h'],
-        'cpp': ['*.cpp', '*.hpp']
+        'c': ['.c', '.h'],
+        'cpp': ['.cpp', '.hpp'], 
     }
 
     detected_techs = set()
